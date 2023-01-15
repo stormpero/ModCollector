@@ -1,12 +1,11 @@
 import os
 import shutil
-import time
+import sys
 import subprocess
 
 import tkinter as tk
 from tkinter import filedialog
 
-import pyautogui
 import PIL.Image
 from pystray import Menu, MenuItem, Icon
 
@@ -19,23 +18,34 @@ paths = Paths()
 paths_config = paths.get()
 
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 def clearFolderMods():
     shutil.rmtree(paths_config["PATH_OUTPUT"])
     os.makedirs(paths_config["PATH_OUTPUT"])
 
 
-def startMinecraft():
-    os.system(f"start {paths_config['PATH_MINECRAFT']}")
-    x = 970
-    y = 745
-    color = "(0, 140, 69)"
-    while True:
-        px = pyautogui.pixel(x, y)
-        print(str(px))
-        if str(px) == color:
-            pyautogui.click(x, y)
-            break
-        time.sleep(0.5)
+# def startMinecraft():
+#     os.system(f"start {paths_config['PATH_MINECRAFT']}")
+#     x = 970
+#     y = 745
+#     color = "(0, 140, 69)"
+#     while True:
+#         px = pyautogui.pixel(x, y)
+#         print(str(px))
+#         if str(px) == color:
+#             pyautogui.click(x, y)
+#             break
+#         time.sleep(0.5)
 
 
 def updateModes():
@@ -49,12 +59,12 @@ def updateModes():
 
 def updateModesAndStart():
     updateModes()
-    startMinecraft()
+    # startMinecraft()
 
 
-image_main = PIL.Image.open("icons/buildmods.ico")
-image_loading = PIL.Image.open("icons/loading.ico")
-image_error = PIL.Image.open("icons/error.ico")
+image_main = PIL.Image.open(resource_path("icons/buildmods.ico"))
+image_loading = PIL.Image.open(resource_path("icons/loading.ico"))
+image_error = PIL.Image.open(resource_path("icons/error.ico"))
 
 
 def is_loading(icon, state):
@@ -80,7 +90,7 @@ def on_clicked_build(icon, item):
         return
     is_loading(icon, True)
     print("Build: Start")
-    # updateModes()
+    updateModes()
     is_loading(icon, False)
     on_ready(icon)
 
@@ -91,7 +101,7 @@ def on_clicked_build_and_start(icon, item):
         return
     is_loading(icon, True)
     print("Build And Start: Start")
-    # updateModesAndStart()
+    updateModesAndStart()
     is_loading(icon, False)
 
 
@@ -125,7 +135,7 @@ def ui_menu():
         MenuItem('Modpacks Build', action=None, enabled=False),
         Menu.SEPARATOR,
         MenuItem('Build', on_clicked_build, default=False),
-        MenuItem('Build and Start', on_clicked_build_and_start),
+        # MenuItem('Build and Start', on_clicked_build_and_start),
         Menu.SEPARATOR,
         MenuItem('Settings', Menu(
             MenuItem("Path input", on_clicked_path_input),
